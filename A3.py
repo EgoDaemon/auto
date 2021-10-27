@@ -14,7 +14,8 @@ from ga_connector import ga_connect
 from pandas import DataFrame as df
 from googleapiclient.discovery import build
 
-key_path = 'C:\\Users\\messnerav\\projects\\m2-main-cd9ed0b4e222.json'
+
+key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
 def sheet_ready(df_r):
