@@ -156,11 +156,8 @@ order by 1"""
 
 all_clops=pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 
-SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
-             'https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name('m2ru-322008-49d82df3892d.json', SCOPES)
-gc = gspread.authorize(credentials)
+
+gc = gspread.authorize(gbq_credential)
 
 all_clops['tot_event'] = all_clops['tot_event'].astype(int)
 all_clops['u_event'] = all_clops['u_event'].astype(int)
