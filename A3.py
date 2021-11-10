@@ -155,10 +155,23 @@ FROM m2-main.UA_REPORTS.A3
 group by  1,2,3,4,5,6,7,8,9,10
 order by 1"""
 
+
+SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
+             'https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
+credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
+
+
 all_clops=pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
 
 
-gc = gspread.authorize(gbq_credential)
+SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
+             'https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
+g_credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
+
+
+gc = gspread.authorize(g_credentials)
 
 all_clops['tot_event'] = all_clops['tot_event'].astype(int)
 all_clops['u_event'] = all_clops['u_event'].astype(int)
