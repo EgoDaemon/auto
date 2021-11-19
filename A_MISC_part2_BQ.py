@@ -97,13 +97,14 @@ def purify_df(df):
     return df
 
 
-q = """SELECT  MAX(date) FROM `m2-main.UA_REPORTS.MISC_UP_Banners` """
-start_D = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-date1 = (datetime.datetime.strptime(start_D['date'][0],"%Y-%m-%d").date()+datetime.timedelta(days=1))
-end = (datetime.datetime.today()-datetime.timedelta(days=1)).date()
+start_date_tr = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.MISC_UP_Banners` """
+start_date_tr  = pandas_gbq.read_gbq(start_date_tr, project_id='m2-main', credentials=gbq_credential)
+start_date_tr  = (datetime.datetime.strptime(start_date_tr['date'][0],"%Y-%m-%d").date()+datetime.timedelta(days=1))     
 
-dates_couples = date_pairs(date1,end,step=1)
-dates_couples
+date1 = start_date_tr
+end = (datetime.datetime.today() -datetime.timedelta(days=1)).date()
+dates_couples = date_pairs(date1, end, step=1)
+date1
 
 ga_conc = ga_connect('208464364')
 params = {'dimetions': [{'name': 'ga:isoweek'},
