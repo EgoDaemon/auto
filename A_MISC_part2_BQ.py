@@ -181,9 +181,8 @@ wk.update('Y2',banners_list)
 # ГАРАНТИЯ СДЕЛОК И ПР.
 
 date1 = datetime.date(2021,8,9) # НЕ менять
-end = datetime.date(2021,11,14)
+end = (datetime.datetime.today()-datetime.timedelta(days=1)).date()
 dates_couples = date_pairs(date1,end, step=1)
-print(dates_couples)
 
 ga_conc = ga_connect('208464364')
 
