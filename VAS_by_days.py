@@ -50,7 +50,7 @@ gbq_credential = service_account.Credentials.from_service_account_file(key_path,
 
 common.to_gbq(f'sheets.VAS_by_days', project_id='m2-main', if_exists='replace', credentials=gbq_credential)
 
-common2 = common.loc[:, 'daily_earnings':'date_spend']
+common2 = common[['region', 'daily_earnings', 'date_spend']] .copy()
 common2 = common2[common2['date_spend'] >= '2021-01-10'].copy()
 
 aaa =  [common2.columns.values.tolist()] + common2.values.tolist()
