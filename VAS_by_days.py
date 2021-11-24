@@ -44,6 +44,7 @@ common = pandas.DataFrame(res, columns = cols)
 common['date_spend'] = common['date_spend'].astype(str)
 common['start_date'] = common['start_date'].astype(str)
 
+key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
 
