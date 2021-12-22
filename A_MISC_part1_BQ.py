@@ -10,6 +10,8 @@ from sqlalchemy import create_engine
 import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2 import service_account
+import gspread
+from isoweek import Week
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
@@ -203,3 +205,41 @@ wk.update('E2', all_bro_unique) #  Пользователи в брокер
 wk.update('H2', all_bro_lead) # Лиды ИБ
 wk.update('L2', regs_all) # Регистрация Всего
 wk.update('O2', regs_up) # Регистрации УП
+
+
+# OWAX COST PART
+
+def date_iso_mon(ned):
+    res =[]
+    for i in ned:
+        d = Week((datetime.now().year), i).monday()
+        d = pd.to_datetime(d, format='%Y-%m-%d')
+        res.append(d)
+    return res
+
+a = '''SELECT extract(isoweek from date((date))) isoweek, CITY, round(sum(COSTS), 2) as COST FROM `m2-main.TEST_REPORTS.UP_MARKETING_DASHBORD`
+WHERE COSTS > 0 and extract(isoweek from date((date))) > 49
+group by 1,2
+order by 1,2'''
+
+c = pandas_gbq.read_gbq(a, project_id='m2-main', credentials=gbq_credential)
+
+cost = c.copy()
+
+cost['start_week'] = date_iso_mon(cost['isoweek'])
+cols = cost.columns.tolist()
+cols.insert(1, cols.pop(cols.index('start_week')))
+cost = cost.reindex(columns= cols)
+
+cost['isoweek'] = cost['isoweek'].astype(int)
+cost['COST'] = cost['COST'].astype(float)
+cost['CITY'] = cost['CITY'].astype(str)
+# cost['start_week'] = pd.to_datetime(cost['start_week'], format='%Y-%m-%d')
+cost['start_week'] = cost['start_week'].astype(str)
+
+g = [cost.columns.values.tolist()] + cost.values.tolist()
+
+sh = gc.open("1. РК Траффик 2020/21 Total")
+wk = sh.worksheet('source_all')
+
+wk.update('BB2', g)
