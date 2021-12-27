@@ -11,7 +11,7 @@ import pandas as pd
 from oauth2client.service_account import ServiceAccountCredentials
 from google.oauth2 import service_account
 import gspread
-from isoweek import Week
+# from isoweek import Week
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
