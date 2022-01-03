@@ -176,11 +176,11 @@ gc = gspread.authorize(g_credentials)
 all_clops['tot_event'] = all_clops['tot_event'].astype(int)
 all_clops['u_event'] = all_clops['u_event'].astype(int)
 
-sh = gc.open("1. РК Траффик 2020/21 Total")
-wk = sh.worksheet('All_clpos')
+sh = gc.open("1. РК Траффик 2022 Total")
+wk = sh.worksheet('source_all')
 
 g_clop=sheet_ready(all_clops)
-wk.update('A1',g_clop)
+wk.update('BB2',g_clop)
 
 sh = gc.open("План/Факт Маркетинг по Классифайду (недельный)")
 wk = sh.worksheet('vas_source')
