@@ -182,8 +182,8 @@ wk = sh.worksheet('source_all')
 g_clop=sheet_ready(all_clops)
 wk.update('BB2',g_clop)
 
-sh = gc.open("План/Факт Маркетинг по Классифайду (недельный)")
-wk = sh.worksheet('vas_source')
+# sh = gc.open("План/Факт Маркетинг по Классифайду (недельный)")
+# wk = sh.worksheet('vas_source')
 
-g_clop=sheet_ready(all_clops)
-wk.update('A1',g_clop)
+# g_clop=sheet_ready(all_clops)
+# wk.update('A1',g_clop)
