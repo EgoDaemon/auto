@@ -123,10 +123,10 @@ lead_bro_source.to_gbq(f'UA_REPORTS.MISC_Leads_broker', project_id='m2-main', if
 reg_all.to_gbq(f'UA_REPORTS.MISC_Registration_All', project_id='m2-main', if_exists='append', credentials=gbq_credential)
 reg_up.to_gbq(f'UA_REPORTS.MISC_Registration_UP', project_id='m2-main', if_exists='append', credentials=gbq_credential)
 
-a = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Transfer_broker'''
-b = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Leads_broker'''
-c = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Registration_All'''
-d = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Registration_UP'''
+a = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Transfer_broker where date >= '2022-01-03' '''
+b = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Leads_broker where date >= '2022-01-03' '''
+c = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Registration_All where date >= '2022-01-03' '''
+d = '''SELECT * FROM m2-main.UA_REPORTS.MISC_Registration_UP where date >= '2022-01-03' '''
 
 
 gotobro_sql = pandas_gbq.read_gbq(a, project_id='m2-main', credentials=gbq_credential)
@@ -197,7 +197,7 @@ g_credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPE
 gc = gspread.authorize(g_credentials)
 
 
-sh = gc.open("1. РК Траффик 2020/21 Total")
+sh = gc.open("1. РК Траффик 2022 Total")
 wk = sh.worksheet('report_conf')
 
 wk.update('A2', all_bro) # Переход в брокер
