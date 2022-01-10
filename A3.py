@@ -150,7 +150,7 @@ hlops.to_gbq(f'UA_REPORTS.A3', project_id='m2-main', if_exists='append', credent
 q = """SELECT week, city, eventlabel, source, medium, cpc_type, VAS_type, CARD_SERP, TOP_BOTTOM,deviceCategory, 
 sum(totalEvents) as tot_event, sum(uniqueEvents) as u_event
 
-FROM m2-main.UA_REPORTS.A3
+FROM m2-main.UA_REPORTS.A3 where date >='2022-01-03'
 
 group by  1,2,3,4,5,6,7,8,9,10
 order by 1"""
