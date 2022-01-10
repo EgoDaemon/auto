@@ -129,7 +129,7 @@ UP_rep = ga_conc.report_pd(dates_couples,params)
 UP_rep.to_gbq(f'UA_REPORTS.MISC_UP_Banners', project_id='m2-main', if_exists='append', credentials=gbq_credential)
 
 
-a = '''SELECT * FROM m2-main.UA_REPORTS.MISC_UP_Banners'''
+a = ''' SELECT * FROM m2-main.UA_REPORTS.MISC_UP_Banners where date >= '2022-01-03' '''
 aa = pandas_gbq.read_gbq(a, project_id='m2-main', credentials=gbq_credential)
 event_banner_df = purify_df(aa)
 
@@ -175,13 +175,13 @@ for i in get_bans.itertuples():
 
 banners_list = rows
         
-sh = gc.open("1. РК Траффик 2020/21 Total")
+sh = gc.open("1. РК Траффик 2022 Total")
 wk = sh.worksheet('source_all')
 wk.update('Y2',banners_list)
 
 # ГАРАНТИЯ СДЕЛОК И ПР.
 
-date1 = datetime.date(2021,8,9) # НЕ менять
+date1 = datetime.date(2021,1,3) # НЕ менять
 end = (datetime.datetime.today()-datetime.timedelta(days=1)).date()
 dates_couples = date_pairs(date1,end, step=1)
 
@@ -311,6 +311,6 @@ for i in misc_cross_events.itertuples():
         rows.append(ls)
 
 
-sh = gc.open("1. РК Траффик 2020/21 Total")
+sh = gc.open("1. РК Траффик 2022 Total")
 wk = sh.worksheet('source_all')
 wk.update('AF2',rows)
