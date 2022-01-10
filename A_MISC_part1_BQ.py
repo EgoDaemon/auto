@@ -219,7 +219,7 @@ def date_iso_mon(ned):
     return res
 
 a = '''SELECT extract(isoweek from date((date))) isoweek, CITY, round(sum(COSTS), 2) as COST FROM `m2-main.TEST_REPORTS.UP_MARKETING_DASHBORD`
-WHERE COSTS > 0 and extract(isoweek from date((date))) > 49
+WHERE COSTS > 0 and date >= '2022-01-03'
 group by 1,2
 order by 1,2'''
 
@@ -240,7 +240,7 @@ cost['start_week'] = cost['start_week'].astype(str)
 
 g = [cost.columns.values.tolist()] + cost.values.tolist()
 
-sh = gc.open("1. РК Траффик 2020/21 Total")
+sh = gc.open("1. РК Траффик 2022 Total")
 wk = sh.worksheet('source_all')
 
 wk.update('BB2', g)
