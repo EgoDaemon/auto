@@ -243,4 +243,4 @@ g = [cost.columns.values.tolist()] + cost.values.tolist()
 sh = gc.open("1. РК Траффик 2022 Total")
 wk = sh.worksheet('source_all')
 
-wk.update('BB2', g)
+wk.update('BO2', g)
