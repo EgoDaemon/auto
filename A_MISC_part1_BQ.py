@@ -100,7 +100,7 @@ params = {'dimetions': [{'name': 'ga:isoweek'},
                        ],
         'metrics':[{'expression': 'ga:totalevents'},
                   ],
-        'filters':'ga:eventlabel=~NewRegSuccessful;ga:source!~ohio8.vchecks.me'
+        'filters':'ga:eventlabel=~(NewRegSuccessful|NewRegRequestSend);ga:source!~ohio8.vchecks.me'
         }
 
 reg_all = ga_conc.report_pd(dates_couples,params)
@@ -113,7 +113,7 @@ params = {'dimetions': [{'name': 'ga:isoweek'},
                        ],
         'metrics':[{'expression': 'ga:totalevents'},
                   ],
-        'filters':'ga:eventlabel=~NewRegSuccessful;ga:landingpagepath=~/nedvizhimost;ga:source!~ohio8.vchecks.me'
+        'filters':'ga:eventlabel=~(NewRegSuccessful|NewRegRequestSend);ga:landingpagepath=~/nedvizhimost;ga:source!~ohio8.vchecks.me'
         }
 
 reg_up = ga_conc.report_pd(dates_couples,params)
