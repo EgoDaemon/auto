@@ -1,39 +1,23 @@
-import datetime
-import os
-from sqlalchemy import create_engine
-import pandas_gbq
-import requests
-import json
-import pandas
 from oauth2client.service_account import ServiceAccountCredentials
-from google.oauth2 import service_account
+import datetime
 import gspread
-import string
+import pandas
 import pandas as pd
-from ga_connector import ga_connect
-from pandas import DataFrame as df
-from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from isoweek import Week
+import pandas_gbq
 
 
 key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
 gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
-def sheet_ready(df_r):
-    rows  = [list(df_r.columns)]
-    for i in df_r.itertuples():
-        ls=list(i)[1:]
-        rows.append(ls)
-    return rows
+SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
+             'https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
 
-def date_pairs(date1, date2, step= 1):
-    pairs= []
-    while date2 >= date1:
-        prev_date = date2 - datetime.timedelta(days=step-1) if date2 - datetime.timedelta(days=step) >= date1 else date1
-        pair = [str(prev_date), str(date2)]   
-        date2 -= datetime.timedelta(days=step)
-        pairs.append(pair)
-    pairs.reverse()
-    return pairs
+g_credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
+gc = gspread.authorize(g_credentials)
+
 
 def get_cpc_soures(cpms):
     if 'second' in cpms:
@@ -43,147 +27,52 @@ def get_cpc_soures(cpms):
     if cpms == '(not set)':
         return 'Не рекламные'
     else:
-        return 'Другие рекламные кампании'
+        return 'Другие рекламные кампании'      
     
-def get_location(s):
-    if 'serp' in s.lower():
-        return 'SERP'
-    if 'card' in s.lower():
-        return 'CARD'
-    else:
-        return None 
-    
-def get_high(s):
-    if 'bottom' in s.lower():
-        return 'bottom'
-    if 'top' in s.lower():
-        return 'top'
-    else:
-        return None     
-
-def get_geo(page):
-    
-    msk='moskva-i-oblast|moskva|moskovskaya-oblast'.split('|')
-    spb= 'sankt-peterburg|leningradskaya-oblast|sankt-peterburg-i-oblast'.split('|')
-    for g in msk:
-        if g in page:
-            return "MSK"
-    for g in spb:
-        if g in page:
-            return "SPB"
         
 def purify_df(df):
-    df.columns = [i.replace('ga:', '') for i in cl_calls_df.columns]
-    df = df[df['eventlabel'].apply(lambda x: 'Rent' not in x)]
-    df['source'] = df['sourcemedium'].apply(lambda x: x.split(" / ")[0])
-    df['medium'] = df['sourcemedium'].apply(lambda x: x.split(" / ")[1])
     df['cpc_type'] = df['campaign'].apply(get_cpc_soures)
-    df['VAS_type'] = df['eventlabel'].apply(lambda x: "VAS" if 'vas' in x.lower() else "NOT_VAS")
-    df['CARD_SERP'] = df['eventlabel'].apply(get_location)
-    df['TOP_BOTTOM'] = df['eventlabel'].apply(get_high)
-    df['city'] = df['pagepath'].apply(get_geo)
+    df['date'] = pd.to_datetime(df['date'], format='%Y-%m-%d')
     df['week'] = df['date'].apply(lambda x: x.isocalendar()[1])
-    df = df.drop(columns = ['sourcemedium','pagepath'])
     df['totalEvents'] = df['totalEvents'].astype(int)
-    df['uniqueEvents'] = df['uniqueEvents'].astype(int)
-    
+    df['uniqueEvents'] = df['uniqueEvents'].astype(int)    
     return df
 
-q = """SELECT  MAX(DATE) as date FROM `m2-main.UA_REPORTS.A3` """
-
-last_dt1 = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-last_dt1 = (datetime.datetime.strptime(last_dt1['date'][0],"%Y-%m-%d").date()+datetime.timedelta(days=1))     
-last_dt1
-
-date1 = last_dt1
-end = (datetime.datetime.today() -datetime.timedelta(days=1)).date()
-dates_couples = date_pairs(date1,end, step=4)
-    
-
-ga_conc = ga_connect('208464364')
-
-filtr = 'ga:eventlabel=~^Cl.*PhoneClick.*'
-
-
-params = {'dimetions':  [{'name': 'ga:date'},
-                         {'name': 'ga:eventlabel'},
-                         {'name': 'ga:campaign'},
-                         {'name': 'ga:sourcemedium'},
-                         {'name': 'ga:pagepath'},
-                         {'name': 'ga:deviceCategory'},
-                         
-                         
-                         
-                        ],
-        'metrics':[{'expression': 'ga:totalEvents'},
-                   {'expression': 'ga:uniqueEvents'}
-                  ],
-        
-        'filters': filtr
-        }
-
-
-cl_calls_df = ga_conc.report_pd(dates_couples,params)
-pure_df = purify_df(cl_calls_df)
-
-engine = create_engine('sqlite://')
-pure_df.to_sql("nbs", con=engine, if_exists = 'replace', index = False)
-
-def get_df(query, engine = engine):
-    df_check = engine.execute(query)
-    return df(df_check.fetchall(), columns = df_check.keys()).fillna(0)
-
 q = '''
-select 
-    date(date) as date , eventlabel, campaign, deviceCategory, source, medium, cpc_type, VAS_type, 
-    CARD_SERP, TOP_BOTTOM, city, week,
-    sum(totalEvents) as totalEvents,
-    sum(uniqueEvents) as uniqueEvents
-from nbs
-group by 1,2,3,4,5,6,7,8,9,10,11,12
+with tr as (
+    SELECT date, campaign, dimension4 
+    FROM `m2-main.UA_REPORTS.UA_TRAFIC_FULL` WHERE date>='2022-01-03'
+),
+
+ev as (
+   SELECT pagepath, eventlabel, uniqueEvents, totalEvents, dimension4
+   FROM `m2-main.UA_REPORTS.UA_ALL_CLOPS` WHERE date>='2022-01-03' AND REGEXP_CONTAINS(eventlabel, r'^Cl.*PhoneClick.*')
+)
+
+select
+
+date,
+(CASE
+WHEN pagepath LIKE '%mosk%' THEN 'MSK'
+WHEN pagepath LIKE '%sankt-%' OR pagepath LIKE '%lening%' THEN 'SPB'
+ELSE '0'
+END) as city,
+pagepath,
+eventlabel,
+campaign,
+SUM(uniqueEvents) as uniqueEvents,
+SUM(totalEvents) as totalEvents
+
+from  tr left join ev using(dimension4) WHERE eventlabel IS NOT NULL
+group by 1,2,3,4,5
+
 '''
-hlops = get_df(q)
-engine.dispose()
 
-hlops.to_gbq(f'UA_REPORTS.A3', project_id='m2-main', if_exists='append', credentials=gbq_credential)
-
-q = """SELECT week, city, eventlabel, source, medium, cpc_type, VAS_type, CARD_SERP, TOP_BOTTOM,deviceCategory, 
-sum(totalEvents) as tot_event, sum(uniqueEvents) as u_event
-
-FROM m2-main.UA_REPORTS.A3 where date >='2022-01-03'
-
-group by  1,2,3,4,5,6,7,8,9,10
-order by 1"""
-
-
-SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
-             'https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
-
-
-all_clops=pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
-
-
-SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
-             'https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-g_credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
-
-
-gc = gspread.authorize(g_credentials)
-
-all_clops['tot_event'] = all_clops['tot_event'].astype(int)
-all_clops['u_event'] = all_clops['u_event'].astype(int)
+hlops = pandas_gbq.read_gbq(q, project_id='m2-main', credentials=gbq_credential)
+pure_df = purify_df(hlops).copy()
+x = pure_df.groupby(['week','city','eventlabel','cpc_type']).agg(tot_event=('totalEvents', 'sum'), u_event=('uniqueEvents', 'sum')).reset_index()
+y = [x.columns.values.tolist()] + x.values.tolist()
 
 sh = gc.open("1. РК Траффик 2022 Total")
 wk = sh.worksheet('source_all')
-
-g_clop=sheet_ready(all_clops)
-wk.update('BB2',g_clop)
-
-# sh = gc.open("План/Факт Маркетинг по Классифайду (недельный)")
-# wk = sh.worksheet('vas_source')
-
-# g_clop=sheet_ready(all_clops)
-# wk.update('A1',g_clop)
+wk.update('BB2',y)
