@@ -181,7 +181,7 @@ wk.update('Y2',banners_list)
 
 # ГАРАНТИЯ СДЕЛОК И ПР.
 
-date1 = datetime.date(2021,1,3) # НЕ менять
+date1 = datetime.date(2022,1,3) # НЕ менять
 end = (datetime.datetime.today()-datetime.timedelta(days=1)).date()
 dates_couples = date_pairs(date1,end, step=1)
 
