@@ -30,26 +30,26 @@ from googleapiclient.discovery import build
 # In[31]:
 
 
-key_path = 'C:\\Users\\messnerav\\projects\\m2-main-cd9ed0b4e222.json'
-gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
-
-SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
-             'https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-
-credentials = ServiceAccountCredentials.from_json_keyfile_name('m2ru-322008-49d82df3892d.json', SCOPES)
-gc = gspread.authorize(credentials)
-
-
-# key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
+# key_path = 'C:\\Users\\messnerav\\projects\\m2-main-cd9ed0b4e222.json'
 # gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
 
 # SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
 #              'https://spreadsheets.google.com/feeds',
 #          'https://www.googleapis.com/auth/drive']
 
-# g_credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
-# gc = gspread.authorize(g_credentials)
+# credentials = ServiceAccountCredentials.from_json_keyfile_name('m2ru-322008-49d82df3892d.json', SCOPES)
+# gc = gspread.authorize(credentials)
+
+
+key_path = '/home/web_analytics/m2-main-cd9ed0b4e222.json'
+gbq_credential = service_account.Credentials.from_service_account_file(key_path,)
+
+SCOPES = ['https://www.googleapis.com/auth/analytics.readonly',
+             'https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
+
+g_credentials = ServiceAccountCredentials.from_json_keyfile_name(key_path, SCOPES)
+gc = gspread.authorize(g_credentials)
 
 
 # # 121-124 U2
